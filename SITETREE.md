@@ -6,11 +6,11 @@
 
 ```
 /                          (public)
-├── /report                 (public, OTP at submit)
-│   └── /report/proxy       (public, OTP at submit)
-├── /report/[id]/update     (public, OTP at submit)
+├── /report                 (public, phone+email+OTP at submit)
+│   └── /report/proxy       (public, phone+email+OTP at submit)
+├── /report/update          (public, phone+email+OTP lookup)
 ├── /about                  (public)
-└── /admin                  (admin)
+└── /admin                  (admin, phone+email+OTP)
 ```
 
 ## Route Table
@@ -18,20 +18,22 @@
 | Path | Type | Auth | Purpose | Parent | Status |
 |---|---|---|---|---|---|
 | / | page | public | Live map — default view, zero login, shows flood/safe/danger/aid-status pins | — | planned |
-| /report | page | public (OTP at submit) | Submit a status report for yourself | / | planned |
-| /report/proxy | page | public (OTP at submit) | Report on behalf of someone without a phone, using reporter's own number | /report | planned |
-| /report/[id]/update | page | public (OTP at submit) | Update an existing report by phone match (e.g. "in danger" → "aided") | / | planned |
+| /report | page | public (phone+email+OTP at submit) | Submit a status report for yourself. Collects phone (callback) + email (OTP delivery). Ends on a confirmation screen ("your report is live, responders can call [number]") | / | planned |
+| /report/proxy | page | public (phone+email+OTP at submit) | Report on behalf of someone without a phone. Reporter's own phone+email are always used, never the subject's | /report | planned |
+| /report/update | page | public (phone+email+OTP lookup) | Enter phone number, verify by email OTP, see and update your existing report's status — replaces the old ID-based update route per Council/Wizard finding: matching is by phone, not report ID | / | planned |
 | /about | page | public | What this is, how it works, how data is used | / | planned |
-| /admin | page | admin | Ops view — raw report feed, toggle aid-matching status (needs-aid / in-progress / aided) | — | planned |
+| /admin | page | admin (phone+email+OTP) | Ops view — raw report feed, toggle aid-matching status (needs-aid / in-progress / aided). Reuses the same phone+email+OTP pattern, no separate admin auth system | — | planned |
 
 ## Field Reference
 
-- **Auth levels:** `public`, `public (OTP at submit)`, `admin`
+- **Auth levels:** `public`, `public (phone+email+OTP at submit)`, `public (phone+email+OTP lookup)`, `admin (phone+email+OTP)`
 - **Status progression:** `planned` → `built` (repo-maintainer, as routes get coded) → `verified` (sentinel or valley-of-death, once auth gates are confirmed against actual code)
 - **API routes do not belong here.** Backend endpoints (e.g. `/api/report`, `/api/otp/send`, `/api/otp/verify`, `/api/admin/reports`) stay in PLANNER.md's "API Routes" table once that's scaffolded by repo-maintainer.
+- **OTP must be re-verified on every status change**, not just first submission — applies to `/report/update` and `/admin` alike. This is a hard requirement from Council PRE-BUILD (Architect), not optional.
 
 ## Notes
 
 - No `/login`, `/signup`, `/dashboard`, `/profile` — BRAIN.md locks out persistent auth/accounts entirely.
-- `/admin` auth mechanism is TBD — BRAIN.md's stack table lists SMS/OTP provider as still undecided; the actual gate for `/admin` (which is a different concern from report-submission OTP) needs a decision at repo-maintainer stage or before.
+- `/admin` reuses the same phone+email+OTP pattern as reports — no second auth system. Which specific phone/email counts as "admin" is a repo-maintainer-stage decision (e.g. a hardcoded allowlist).
+- OTP delivery channel is email, not SMS, until a sponsor funds SMS costs (see BRAIN.md Core Decisions, 2026-07-21). Phone number is still collected and is still the callback contact — email is only the OTP delivery channel.
 - Route count: 6 pages, 0 authenticated, 5 public, 1 admin.

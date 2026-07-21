@@ -29,7 +29,9 @@ The center of all flood-status information for an area — a live map an organiz
 These decisions are final. Claude must not question or work around them without explicit confirmation from Fahim.
 
 - [LOCKED] Map browsing requires zero login — anyone can view live status instantly, no account, no wall
-- [LOCKED] Verification happens only at report-submission time, not at app entry — phone number + OTP SMS only (proves human, gives responders a callback number). No email, no password, no persistent account/session.
+- [LOCKED] Verification happens only at report-submission time, not at app entry — no persistent account/session, no password.
+- [LOCKED] [SUPERSEDED by: 2026-07-21 decision below] ~~phone number + OTP SMS only (proves human, gives responders a callback number). No email.~~
+- [LOCKED] (2026-07-21) Report submission collects BOTH phone number (callback contact for responders, always required) AND email (OTP delivery channel, always required) — reason: SMS costs money per message with no revenue to offset it (flagged by Council PRE-BUILD, Coin-master + Architect), so OTP is delivered by email for now. Phone number is still the field responders call — email exists only to deliver the verification code, it is not a substitute contact method. Revisit SMS OTP once a sponsor is secured; when that happens, phone becomes the OTP channel again and email may become optional.
 - [LOCKED] Proxy reporting is a first-class feature — a person can report a neighbor who has no phone. The phone number collected is always the reporter's own, never a fabricated one for the neighbor, so responders call someone who can actually be reached.
 - [LOCKED] Reports are matched/updated by phone number, not account — same number reporting again updates their existing report (e.g. "in danger" → "aided") instead of creating a duplicate.
 - [LOCKED] Status states beyond flooded/safe: aided, in need of aid, in process of aiding — this is a live matching system, not a static incident log.
@@ -72,7 +74,7 @@ These decisions are final. Claude must not question or work around them without 
 ## Current State
 
 ```
-Status: Pre-build (BRAIN.md just committed)
+Status: Pre-build (BRAIN.md + SITETREE.md committed, Council PRE-BUILD delivered CONDITIONAL GO)
 Last updated: 2026-07-21
 
 What works:
@@ -82,8 +84,7 @@ What's broken or incomplete:
 - Entire build — this is day zero
 
 What's next (in spirit, not tasks):
-- tree-man to produce SITETREE.md
-- Council PRE-BUILD verdict
+- Council's 5 pre-build requirements: OTP re-verify on every update, /admin auth decided (resolved: reuse phone+email+OTP pattern), OTP delivery channel decided (resolved: email, see Core Decisions), /report/[id]/update rewritten as phone-lookup not ID-based, confirmation screen after submission
 - repo-maintainer scaffold on GO
 ```
 
@@ -102,7 +103,7 @@ These are confirmed for this project. Do not suggest alternatives unless Fahim i
 | Auth | None (no Better Auth, no sessions) — lightweight phone + OTP verification tied to reports only |
 | Map | Leaflet.js (no API key required, free tier sufficient) |
 | Media | Cloudinary (report photos) |
-| SMS/OTP | TBD at repo-maintainer stage — needs a provider decision (e.g. Twilio-compatible or local BD SMS gateway) |
+| OTP delivery | Email (transactional email provider, e.g. Resend — pick at repo-maintainer stage). SMS deferred until sponsored — see Core Decisions. |
 | Deployment | Vercel (primary) |
 
 ---
@@ -129,6 +130,9 @@ Things Claude tends to forget or get wrong on this specific project. Treat these
 - "Flooded" and "in danger/needs aid" are NOT the same field — a house can be flooded but not in danger (Q3: "residence not in danger" is a valid, distinct report type). Do not collapse these into one boolean.
 - Status states (aided / in need of aid / in process of aiding) apply to relief-matching, separate from the flood-status states (flooded / safe / not in danger). Two different state machines — don't merge them.
 - Brand accent (teal) is never reused as a map status color. Status colors are a separate semantic set, defined later in DESIGN_GUIDE.md.
+- OTP code is emailed, not texted, until a sponsor funds SMS. The phone number field is NOT optional or removed — it's still the callback number responders use, collected alongside email on every report form. Do not conflate "OTP goes to email" with "phone number is no longer collected."
+- OTP must be re-verified on every status update (not just first submission) and both report-submission and update endpoints need per-phone-number rate limiting — Council PRE-BUILD Architect finding, prevents false "aided" spam burying real in-need reports.
+- `/admin` needs its own auth decision before it's built — reuse the phone+email+OTP pattern already established rather than inventing a second auth system (Council PRE-BUILD finding).
 
 ---
 
