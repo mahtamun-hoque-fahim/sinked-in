@@ -103,7 +103,7 @@ These are confirmed for this project. Do not suggest alternatives unless Fahim i
 | Auth | None (no Better Auth, no sessions) — lightweight phone + OTP verification tied to reports only |
 | Map | Leaflet.js (no API key required, free tier sufficient) |
 | Media | Cloudinary (report photos) |
-| OTP delivery | Email (transactional email provider, e.g. Resend — pick at repo-maintainer stage). SMS deferred until sponsored — see Core Decisions. |
+| OTP delivery | Email via Resend. SMS deferred until sponsored — see Core Decisions. |
 | Deployment | Vercel (primary) |
 
 ---
