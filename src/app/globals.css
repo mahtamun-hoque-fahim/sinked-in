@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* Storm Ledger palette — locked in BRAIN.md § Visual Identity.
+   Do not substitute or invent new values here. */
+@theme {
+  --color-bg: #0c0f0e;
+  --color-surface: #141917;
+  --color-surface-elevated: #1c231f;
+  --color-border: #212824;
+
+  --color-text: #eef3f1;
+  --color-text-muted: #a9b3ae;
+  --color-text-faint: #6d7773;
+
+  --color-accent: #3dd6c4;
+  --color-accent-hover: #33bfae;
+  --color-accent-faint: #3dd6c41a;
+
+  /* Map status colors — a separate semantic set from the brand accent.
+     Never reuse teal for flood status. See DESIGN_GUIDE.md. */
+  --color-status-flooded: #ef4444;
+  --color-status-safe: #22c55e;
+  --color-status-not-in-danger: #eab308;
+
+  /* Aid-matching status colors — a second, distinct semantic set. */
+  --color-aid-needed: #f97316;
+  --color-aid-in-progress: #3b82f6;
+  --color-aid-complete: #3dd6c4;
+
+  --font-plex-sans: var(--font-plex-sans);
+  --font-jetbrains-mono: var(--font-jetbrains-mono);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-plex-sans), system-ui, sans-serif;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Leaflet base styles are imported per-component (see Map.tsx) since
+   this file has no dependency on leaflet's CSS module system. */

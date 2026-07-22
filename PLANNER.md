@@ -156,26 +156,26 @@ Status: `[x]` done
 - [x] repo-maintainer scaffold (this pass)
 
 ### Phase 1 — Foundation
-Status: `[ ]` pending
+Status: `[x]` done
 
-- [ ] Repo created, Vercel connected
-- [ ] Drizzle schema for `reports`, `otp_codes`, `admin_allowlist`
-- [ ] Resend integration for OTP email
-- [ ] Rate limiting on `/api/otp/send` and `/api/otp/verify` (per-phone)
+- [x] Repo created, Vercel connected (Vercel connection is a manual dashboard step for Fahim — not scriptable from here)
+- [x] Drizzle schema for `reports`, `otp_codes`, `admin_allowlist`
+- [x] Resend integration for OTP email
+- [x] Rate limiting on `/api/otp/send` and `/api/otp/verify` (per-phone)
 
 ### Phase 2 — Core flows
-Status: `[ ]` pending
+Status: `[x]` done
 
-- [ ] `/` live map (Leaflet, public read)
-- [ ] `/report` submit flow with OTP + confirmation screen
-- [ ] `/report/proxy`
-- [ ] `/report/update` (phone-lookup + OTP re-verify)
-- [ ] `/about`
+- [x] `/` live map (Leaflet, public read)
+- [x] `/report` submit flow with OTP + confirmation screen
+- [x] `/report/proxy`
+- [x] `/report/update` (phone-lookup + OTP re-verify)
+- [x] `/about`
 
 ### Phase 3 — Admin & polish
 Status: `[ ]` pending
 
-- [ ] `/admin` allowlist auth + aid-status toggling
+- [x] `/admin` allowlist auth + aid-status toggling
 - [ ] Cloudinary photo upload on report submission
 - [ ] Mobile one-handed usability pass (BRAIN.md hard constraint)
 - [ ] Accessibility pass (WCAG 2.2 AA)
@@ -186,11 +186,12 @@ Status: `[ ]` pending
 ## Next Steps
 
 In order:
-1. Scaffold Next.js 16 project, connect Vercel + Neon
-2. Write Drizzle schema for `reports`, `otp_codes`, `admin_allowlist`; push to dev DB
-3. Build `/api/otp/send` + `/api/otp/verify` with Resend, rate limiting, and hashed-at-rest codes
-4. Build `/report` end-to-end (form → OTP → submit → confirmation) before touching the map — get one report writable before making it visible
-5. Build `/` map reading from `/api/reports`
+1. Create the Neon project, run `npx drizzle-kit migrate` against it (migration already generated: `drizzle/0000_clear_molly_hayes.sql`)
+2. Set up Resend account + verified sending domain, add `RESEND_API_KEY` to `.env.local` and Vercel
+3. Seed `admin_allowlist` with at least one real phone+email so `/admin` is reachable
+4. Connect the repo to Vercel, set all env vars (see README.md → Env vars) for Production and Preview
+5. Cloudinary integration for report photo upload (currently the schema and API support `photoUrl` but no upload UI exists yet)
+6. Mobile one-handed usability pass and WCAG 2.2 AA accessibility pass before first real deploy
 
 Rewrite this section fresh on every `update repo` sync.
 

@@ -43,6 +43,11 @@ Execute automatically at the start of every session, before the first commit —
 
 (Newest first. Maximum 10 entries — drop the oldest when an 11th is added.)
 
+### 2026-07-22
+- Did: Scaffolded and built the full Next.js 16 app — Drizzle schema (reports, otp_codes, admin_allowlist), Neon client, OTP generation/hashing/rate-limiting, Resend email delivery, signed purpose-scoped verification tokens, all 8 API routes, all 6 pages (/, /report, /report/proxy, /report/update, /about, /admin), Leaflet map (client-only via dynamic import), Storm Ledger design tokens in globals.css, IBM Plex Sans + JetBrains Mono via @fontsource. Generated first Drizzle migration (drizzle/0000_clear_molly_hayes.sql). `npm run build` and `eslint` both pass clean.
+- Decided: OTP verification issues a short-lived HMAC-signed token scoped to one phone+purpose pair (submit/update/admin) rather than reusing raw codes — a submit-purpose token cannot authorize an update or admin action, satisfying the Council re-verification requirement without needing sessions
+- Next: Create the Neon project and run the migration; set up Resend + verified domain; seed admin_allowlist; connect Vercel and set env vars; build Cloudinary photo upload UI; mobile one-handed + WCAG 2.2 AA passes before first real deploy
+
 ### 2026-07-21
 - Did: Singularity interview → BRAIN.md committed; tree-man → SITETREE.md committed (6 routes); Council PRE-BUILD convened, delivered CONDITIONAL GO; repo-maintainer scaffolded PLANNER.md, DESIGN_GUIDE.md, README.md, AGENTS.md, CLAUDE.md
 - Decided: OTP delivery is email via Resend (not SMS) until a sponsor is secured — phone number still required as callback contact; `/report/[id]/update` redesigned as `/report/update` (phone-lookup) per Council/Wizard finding; `/admin` reuses the same phone+email+OTP pattern via an allowlist table, no second auth system
