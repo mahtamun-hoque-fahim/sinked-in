@@ -55,6 +55,7 @@ npm run lint         # ESLint
 npx drizzle-kit generate   # generate migration from schema
 npx drizzle-kit migrate    # apply migrations
 npx drizzle-kit push       # push schema directly (dev only)
+npm run seed:admin         # seed admin_allowlist from ADMIN_ALLOWLIST_SEED (safe to re-run)
 ```
 
 ## Deploy
