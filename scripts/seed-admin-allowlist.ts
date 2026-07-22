@@ -2,6 +2,9 @@
 // phone:email pairs). Safe to re-run — skips pairs already present.
 // Usage: npx tsx scripts/seed-admin-allowlist.ts
 
+import { config } from "dotenv";
+config({ path: ".env.local" });
+
 import { getDb } from "../src/lib/db";
 import { adminAllowlist } from "../src/lib/db/schema";
 import { and, eq } from "drizzle-orm";
