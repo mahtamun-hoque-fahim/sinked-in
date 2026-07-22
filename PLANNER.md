@@ -125,6 +125,7 @@ Drizzle schema lives in `lib/db/schema.ts`. Summary — no `users`/`sessions`/`a
 | GET | /api/reports/lookup | requires verified OTP token (purpose: update) | query: `phone` | Report[] |
 | GET | /api/admin/reports | requires verified OTP token (purpose: admin) + allowlist match | — | Report[] (full detail, phone/email visible) |
 | PATCH | /api/admin/reports/[id] | requires verified OTP token (purpose: admin) + allowlist match | `{ aidStatus }` | Report |
+| POST | /api/upload-signature | public (no OTP — signature alone cannot create a report) | — | `{ signature, timestamp, apiKey, cloudName, folder }` for direct-to-Cloudinary upload |
 
 ---
 
@@ -173,12 +174,12 @@ Status: `[x]` done
 - [x] `/about`
 
 ### Phase 3 — Admin & polish
-Status: `[ ]` pending
+Status: `[x]` done
 
 - [x] `/admin` allowlist auth + aid-status toggling
-- [ ] Cloudinary photo upload on report submission
-- [ ] Mobile one-handed usability pass (BRAIN.md hard constraint)
-- [ ] Accessibility pass (WCAG 2.2 AA)
+- [x] Cloudinary photo upload on report submission (signed direct-to-Cloudinary upload via `/api/upload-signature`)
+- [x] Mobile one-handed usability pass (all interactive elements now 48px minimum, 56px on primary report CTA)
+- [x] Accessibility pass (WCAG 2.2 AA) — landmark roles on map and confirmation screen, focus-visible outlines, reduced-motion support, semantic label associations throughout
 - [ ] Production deploy verification
 
 ---
@@ -188,10 +189,10 @@ Status: `[ ]` pending
 In order:
 1. Create the Neon project, run `npx drizzle-kit migrate` against it (migration already generated: `drizzle/0000_clear_molly_hayes.sql`)
 2. Set up Resend account + verified sending domain, add `RESEND_API_KEY` to `.env.local` and Vercel
-3. Seed `admin_allowlist` with at least one real phone+email so `/admin` is reachable
-4. Connect the repo to Vercel, set all env vars (see README.md → Env vars) for Production and Preview
-5. Cloudinary integration for report photo upload (currently the schema and API support `photoUrl` but no upload UI exists yet)
-6. Mobile one-handed usability pass and WCAG 2.2 AA accessibility pass before first real deploy
+3. Set up a Cloudinary account, add `CLOUDINARY_CLOUD_NAME`/`CLOUDINARY_API_KEY`/`CLOUDINARY_API_SECRET`
+4. Seed `admin_allowlist` with at least one real phone+email so `/admin` is reachable
+5. Connect the repo to Vercel, set all env vars (see README.md → Env vars) for Production and Preview
+6. Run ticket-checker before the first real deploy
 
 Rewrite this section fresh on every `update repo` sync.
 

@@ -125,7 +125,7 @@ export default function ReportUpdatePage() {
                       key={opt.value}
                       type="button"
                       onClick={() => handleUpdate(r.id, opt.value)}
-                      className={`px-3 py-2 rounded-md text-sm border transition-colors min-h-[40px] ${
+                      className={`px-3 py-2 rounded-md text-sm border transition-colors min-h-[48px] ${
                         r.floodStatus === opt.value
                           ? "bg-accent text-bg border-accent"
                           : "bg-bg text-text border-border hover:bg-surface-elevated"

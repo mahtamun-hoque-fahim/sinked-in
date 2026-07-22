@@ -101,7 +101,7 @@ export default function AdminPage() {
                   <button
                     key={opt.value}
                     onClick={() => handleAidUpdate(r.id, opt.value)}
-                    className={`px-3 py-2 rounded-md text-sm border transition-colors min-h-[40px] ${
+                    className={`px-3 py-2 rounded-md text-sm border transition-colors min-h-[48px] ${
                       r.aidStatus === opt.value
                         ? "bg-accent text-bg border-accent"
                         : "bg-bg text-text border-border hover:bg-surface-elevated"

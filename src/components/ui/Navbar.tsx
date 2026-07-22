@@ -19,7 +19,7 @@ export default function Navbar() {
           </Link>
           <Link
             href="/report"
-            className="bg-status-flooded text-white px-4 py-2 rounded-md font-semibold hover:opacity-90 transition-opacity min-h-[40px] flex items-center"
+            className="bg-status-flooded text-white px-4 py-2 rounded-md font-semibold hover:opacity-90 transition-opacity min-h-[48px] flex items-center"
           >
             Report status
           </Link>

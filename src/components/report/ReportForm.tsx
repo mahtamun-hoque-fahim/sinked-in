@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import OtpInput from "@/components/ui/OtpInput";
+import PhotoUpload from "@/components/report/PhotoUpload";
 import { sendOtp, verifyOtpCode, submitReport } from "@/lib/api-client";
 
 type Step = "details" | "verify" | "confirmed";
@@ -24,6 +25,7 @@ export default function ReportForm({ isProxy = false }: { isProxy?: boolean }) {
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [address, setAddress] = useState("");
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -80,6 +82,7 @@ export default function ReportForm({ isProxy = false }: { isProxy?: boolean }) {
         latitude: Number(latitude),
         longitude: Number(longitude),
         address: address.trim() || undefined,
+        photoUrl: photoUrl ?? undefined,
         isProxy,
       });
       setConfirmedPhone(phone.trim());
@@ -93,7 +96,7 @@ export default function ReportForm({ isProxy = false }: { isProxy?: boolean }) {
 
   if (step === "confirmed") {
     return (
-      <div className="bg-surface border border-border rounded-lg p-6 flex flex-col gap-3">
+      <div className="bg-surface border border-border rounded-lg p-6 flex flex-col gap-3" role="status">
         <h2 className="text-2xl font-semibold text-status-safe">Your report is live</h2>
         <p className="text-lg text-text-muted">
           Responders can reach {isProxy ? "you" : "you"} at {confirmedPhone}.
@@ -175,6 +178,8 @@ export default function ReportForm({ isProxy = false }: { isProxy?: boolean }) {
           placeholder="Road / area name"
         />
       </div>
+
+      <PhotoUpload photoUrl={photoUrl} onChange={setPhotoUrl} />
 
       <Input
         id="phone"

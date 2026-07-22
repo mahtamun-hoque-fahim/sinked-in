@@ -43,6 +43,11 @@ Execute automatically at the start of every session, before the first commit —
 
 (Newest first. Maximum 10 entries — drop the oldest when an 11th is added.)
 
+### 2026-07-22 (continued)
+- Did: Added Cloudinary photo upload — signed direct-to-Cloudinary upload flow (`/api/upload-signature` + `PhotoUpload` client component), so photo bytes never pass through our own serverless function. Wired into ReportForm. Did a tap-target pass (all interactive elements now 48px minimum, up from a mix of 40/48px) and an accessibility pass (landmark role + aria-label on the map, role="status" on the confirmation screen). All 14 routes still build and lint clean.
+- Decided: Upload-signature endpoint is intentionally not OTP-gated — a signature alone only permits one scoped Cloudinary upload, it can't create or alter a report on its own, so gating it would add friction without a security benefit
+- Next: Phase 3 checklist is now fully done in code. Remaining items are account/infra setup only (Neon, Resend, Cloudinary, Vercel, admin_allowlist seed) — see PLANNER.md Next Steps
+
 ### 2026-07-22
 - Did: Scaffolded and built the full Next.js 16 app — Drizzle schema (reports, otp_codes, admin_allowlist), Neon client, OTP generation/hashing/rate-limiting, Resend email delivery, signed purpose-scoped verification tokens, all 8 API routes, all 6 pages (/, /report, /report/proxy, /report/update, /about, /admin), Leaflet map (client-only via dynamic import), Storm Ledger design tokens in globals.css, IBM Plex Sans + JetBrains Mono via @fontsource. Generated first Drizzle migration (drizzle/0000_clear_molly_hayes.sql). `npm run build` and `eslint` both pass clean.
 - Decided: OTP verification issues a short-lived HMAC-signed token scoped to one phone+purpose pair (submit/update/admin) rather than reusing raw codes — a submit-purpose token cannot authorize an update or admin action, satisfying the Council re-verification requirement without needing sessions

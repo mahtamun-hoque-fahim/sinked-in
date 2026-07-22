@@ -39,7 +39,7 @@ export default function Map() {
   }, []);
 
   return (
-    <div className="relative flex-1 min-h-[500px]">
+    <div className="relative flex-1 min-h-[500px]" role="region" aria-label="Live flood status map">
       {loading && (
         <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-bg/80">
           <p className="text-text-muted">Loading live reports...</p>
