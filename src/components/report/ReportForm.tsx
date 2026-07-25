@@ -134,14 +134,30 @@ export default function ReportForm({ isProxy = false }: { isProxy?: boolean }) {
           {FLOOD_OPTIONS.map((opt) => (
             <label
               key={opt.value}
-              className="flex items-center gap-2 bg-bg border border-border rounded-md px-3 py-2 min-h-[48px] cursor-pointer"
+              className={`flex items-center gap-3 bg-bg border rounded-md px-3 py-3 min-h-[48px] cursor-pointer transition-colors ${
+                floodStatus === opt.value
+                  ? "border-accent"
+                  : "border-border hover:border-text-faint"
+              }`}
             >
+              <span
+                className={`size-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${
+                  floodStatus === opt.value
+                    ? "border-accent"
+                    : "border-text-faint"
+                }`}
+              >
+                {floodStatus === opt.value && (
+                  <span className="size-2 rounded-full bg-accent block" />
+                )}
+              </span>
               <input
                 type="radio"
                 name="floodStatus"
                 value={opt.value}
                 checked={floodStatus === opt.value}
                 onChange={() => setFloodStatus(opt.value)}
+                className="sr-only"
               />
               {opt.label}
             </label>

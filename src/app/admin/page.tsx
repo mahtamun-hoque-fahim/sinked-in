@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { RefreshCw } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import OtpInput from "@/components/ui/OtpInput";
@@ -25,6 +26,8 @@ export default function AdminPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
@@ -47,6 +50,7 @@ export default function AdminPage() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? "Failed to load reports");
     setReports(data);
+    setLastUpdated(new Date());
   }
 
   async function handleVerify(e: React.FormEvent) {
@@ -81,12 +85,49 @@ export default function AdminPage() {
     }
   }
 
+  async function handleRefresh() {
+    setRefreshing(true);
+    setError(null);
+    try {
+      await loadReports(token);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Refresh failed.");
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   if (step === "dashboard") {
     return (
       <div className="max-w-3xl mx-auto w-full px-4 py-8 flex flex-col gap-6">
-        <h1 className="text-2xl font-bold">Report feed</h1>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">Report feed</h1>
+            {lastUpdated && (
+              <p className="text-xs text-text-faint mt-0.5">
+                Updated {lastUpdated.toLocaleTimeString()}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-3 py-2 rounded-md bg-surface border border-border text-text-muted hover:bg-surface-elevated transition-colors min-h-[48px] disabled:opacity-50"
+          >
+            <RefreshCw className={`size-4 ${refreshing ? "animate-spin" : ""}`} aria-hidden="true" />
+            Refresh
+          </button>
+        </div>
         {error && <p className="text-status-flooded text-sm">{error}</p>}
         <div className="flex flex-col gap-3">
+          {reports.length === 0 && (
+            <div className="bg-surface border border-border rounded-lg p-8 flex flex-col items-center gap-2 text-center">
+              <p className="text-text-muted font-medium">No reports yet</p>
+              <p className="text-text-faint text-sm max-w-sm">
+                Reports submitted via the map will appear here. You can toggle their aid status once they come in.
+              </p>
+            </div>
+          )}
           {reports.map((r) => (
             <div key={r.id} className="bg-surface border border-border rounded-lg p-4 flex flex-col gap-2">
               <div className="flex items-center gap-2 flex-wrap">
