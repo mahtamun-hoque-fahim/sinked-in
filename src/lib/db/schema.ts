@@ -28,21 +28,26 @@ export const otpPurposeEnum = pgEnum("otp_purpose", [
   "admin",
 ]);
 
+// Category controls map pin color for showcase/triage purposes.
+// status = yellow (sinked/flooded report)
+// medical = red (needs medical assistance)
+// food = blue (needs food/supplies)
+export const reportCategoryEnum = pgEnum("report_category", [
+  "status",
+  "medical",
+  "food",
+]);
+
 export const reports = pgTable("reports", {
   id: text("id").primaryKey().$defaultFn(() => nanoid()),
-  // Callback contact for responders. Reports are matched/updated by this
-  // field, not by account or ID. See BRAIN.md Core Decisions.
   phone: text("phone").notNull(),
-  // OTP delivery channel only. Not a contact method responders use.
   email: text("email").notNull(),
   latitude: numeric("latitude", { precision: 10, scale: 7 }).notNull(),
   longitude: numeric("longitude", { precision: 10, scale: 7 }).notNull(),
   address: text("address"),
   floodStatus: floodStatusEnum("flood_status").notNull(),
   aidStatus: aidStatusEnum("aid_status"),
-  // True if this report was submitted by someone reporting a neighbor.
-  // The phone/email above always belong to the reporter, never the
-  // subject of a proxy report. See BRAIN.md Core Decisions.
+  category: reportCategoryEnum("category").notNull().default("status"),
   isProxy: boolean("is_proxy").notNull().default(false),
   photoUrl: text("photo_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
