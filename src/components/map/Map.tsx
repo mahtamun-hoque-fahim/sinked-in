@@ -1,20 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { fetchReports } from "@/lib/api-client";
 import { StatusBadge, AidBadge } from "@/components/ui/Badges";
 import type { Report } from "@/lib/db/schema";
 
-const CHATTOGRAM_CENTER: [number, number] = [22.3569, 91.7832];
+// Chattogram city center — Anderkilla / GEC area
+const CHATTOGRAM_CENTER: [number, number] = [22.3384, 91.8317];
 
-// Pin color is determined by category, not flood status.
-// category drives the triage color on the map for responders.
 const CATEGORY_COLOR: Record<string, string> = {
-  medical: "#ef4444", // red
-  food:    "#3b82f6", // blue
-  status:  "#eab308", // yellow
+  medical: "#ef4444",
+  food:    "#3b82f6",
+  status:  "#eab308",
+};
+
+const CATEGORY_LABEL: Record<string, string> = {
+  medical: "Medical assistance",
+  food:    "Food / supplies",
+  status:  "Flood status",
 };
 
 const LEGEND = [
@@ -23,11 +29,30 @@ const LEGEND = [
   { color: "#eab308", label: "Flood status report" },
 ];
 
-const CATEGORY_LABEL: Record<string, string> = {
-  medical: "Medical assistance",
-  food:    "Food / supplies",
-  status:  "Flood status",
-};
+function createPinIcon(color: string) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 46" width="32" height="46">
+      <filter id="shadow" x="-30%" y="-10%" width="160%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.35"/>
+      </filter>
+      <path
+        d="M16 0C7.163 0 0 7.163 0 16c0 10.5 14 29 15.3 30.7a.9.9 0 001.4 0C18 44.9 32 26.5 32 16 32 7.163 24.837 0 16 0z"
+        fill="${color}"
+        filter="url(#shadow)"
+        stroke="white"
+        stroke-width="1.5"
+      />
+      <circle cx="16" cy="15" r="6" fill="white" fill-opacity="0.95"/>
+    </svg>`;
+
+  return L.divIcon({
+    html: svg,
+    iconSize: [32, 46],
+    iconAnchor: [16, 46],
+    popupAnchor: [0, -48],
+    className: "",
+  });
+}
 
 export default function Map() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -57,14 +82,10 @@ export default function Map() {
       )}
 
       {/* Legend */}
-      <div className="absolute bottom-8 left-4 z-[1000] bg-surface/95 border border-border rounded-lg px-3 py-2 flex flex-col gap-1.5">
+      <div className="absolute bottom-8 left-4 z-[1000] bg-surface/95 border border-border rounded-lg px-3 py-2 flex flex-col gap-1.5 shadow-md">
         {LEGEND.map((l) => (
           <div key={l.color} className="flex items-center gap-2 text-xs text-text-muted">
-            <span
-              className="size-3 rounded-full flex-shrink-0"
-              style={{ backgroundColor: l.color }}
-              aria-hidden="true"
-            />
+            <span className="size-3 rounded-full flex-shrink-0" style={{ backgroundColor: l.color }} aria-hidden="true" />
             {l.label}
           </div>
         ))}
@@ -84,21 +105,20 @@ export default function Map() {
           const cat = (r as Report & { category?: string }).category ?? "status";
           const color = CATEGORY_COLOR[cat] ?? "#eab308";
           return (
-            <CircleMarker
+            <Marker
               key={r.id}
-              center={[Number(r.latitude), Number(r.longitude)]}
-              radius={8}
-              pathOptions={{ color, fillColor: color, fillOpacity: 0.75, weight: 2 }}
+              position={[Number(r.latitude), Number(r.longitude)]}
+              icon={createPinIcon(color)}
             >
               <Popup>
-                <div className="flex flex-col gap-1 text-sm min-w-[140px]">
-                  <p className="font-semibold">{CATEGORY_LABEL[cat] ?? cat}</p>
+                <div className="flex flex-col gap-1.5 text-sm min-w-[160px]">
+                  <p className="font-semibold text-base">{CATEGORY_LABEL[cat] ?? cat}</p>
                   <StatusBadge status={r.floodStatus} />
                   {r.aidStatus && <AidBadge status={r.aidStatus} />}
                   {r.address && <p className="text-xs text-gray-500 mt-1">{r.address}</p>}
                 </div>
               </Popup>
-            </CircleMarker>
+            </Marker>
           );
         })}
       </MapContainer>
