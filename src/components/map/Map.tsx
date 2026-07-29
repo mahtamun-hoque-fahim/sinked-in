@@ -28,31 +28,28 @@ const LEGEND = [
   { color: "#eab308", label: "Flood status report" },
 ];
 
-// Classic Google Maps-style location pin:
-// large circle head, body narrowing to a sharp point at the bottom.
 function createPinIcon(color: string) {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 42" width="30" height="42">
+  // Google Maps-style pin: round circle head, body tapering to sharp bottom point.
+  // viewBox 0 0 24 36 — head circle center at (12,11) r=9, point at (12,36).
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="36" height="54">
     <defs>
-      <filter id="s" x="-40%" y="-10%" width="180%" height="150%">
-        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.4"/>
+      <filter id="d" x="-50%" y="-20%" width="200%" height="160%">
+        <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.45"/>
       </filter>
     </defs>
     <path
-      d="M15 0C8.373 0 3 5.373 3 12c0 8.5 11 28 12 30 1-2 12-21.5 12-30C27 5.373 21.627 0 15 0z"
+      d="M12 0C5.925 0 1 4.925 1 11c0 3.274 1.394 6.22 3.614 8.29L12 36l7.386-16.71A10.956 10.956 0 0 0 23 11C23 4.925 18.075 0 12 0z"
       fill="${color}"
-      filter="url(#s)"
-      stroke="white"
-      stroke-width="1.5"
-      stroke-linejoin="round"
+      filter="url(#d)"
     />
-    <circle cx="15" cy="12" r="5.5" fill="white" opacity="0.95"/>
+    <circle cx="12" cy="11" r="5" fill="white" opacity="0.95"/>
   </svg>`;
 
   return L.divIcon({
     html: svg,
-    iconSize: [30, 42],
-    iconAnchor: [15, 42],
-    popupAnchor: [0, -44],
+    iconSize: [36, 54],
+    iconAnchor: [18, 54],
+    popupAnchor: [0, -56],
     className: "",
   });
 }
