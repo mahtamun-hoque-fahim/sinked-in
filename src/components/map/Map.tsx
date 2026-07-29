@@ -8,7 +8,6 @@ import { fetchReports } from "@/lib/api-client";
 import { StatusBadge, AidBadge } from "@/components/ui/Badges";
 import type { Report } from "@/lib/db/schema";
 
-// Chattogram city center — Anderkilla / GEC area
 const CHATTOGRAM_CENTER: [number, number] = [22.3384, 91.8317];
 
 const CATEGORY_COLOR: Record<string, string> = {
@@ -29,27 +28,31 @@ const LEGEND = [
   { color: "#eab308", label: "Flood status report" },
 ];
 
+// Classic Google Maps-style location pin:
+// large circle head, body narrowing to a sharp point at the bottom.
 function createPinIcon(color: string) {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 46" width="32" height="46">
-      <filter id="shadow" x="-30%" y="-10%" width="160%" height="140%">
-        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.35"/>
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 42" width="30" height="42">
+    <defs>
+      <filter id="s" x="-40%" y="-10%" width="180%" height="150%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.4"/>
       </filter>
-      <path
-        d="M16 0C7.163 0 0 7.163 0 16c0 10.5 14 29 15.3 30.7a.9.9 0 001.4 0C18 44.9 32 26.5 32 16 32 7.163 24.837 0 16 0z"
-        fill="${color}"
-        filter="url(#shadow)"
-        stroke="white"
-        stroke-width="1.5"
-      />
-      <circle cx="16" cy="15" r="6" fill="white" fill-opacity="0.95"/>
-    </svg>`;
+    </defs>
+    <path
+      d="M15 0C8.373 0 3 5.373 3 12c0 8.5 11 28 12 30 1-2 12-21.5 12-30C27 5.373 21.627 0 15 0z"
+      fill="${color}"
+      filter="url(#s)"
+      stroke="white"
+      stroke-width="1.5"
+      stroke-linejoin="round"
+    />
+    <circle cx="15" cy="12" r="5.5" fill="white" opacity="0.95"/>
+  </svg>`;
 
   return L.divIcon({
     html: svg,
-    iconSize: [32, 46],
-    iconAnchor: [16, 46],
-    popupAnchor: [0, -48],
+    iconSize: [30, 42],
+    iconAnchor: [15, 42],
+    popupAnchor: [0, -44],
     className: "",
   });
 }
@@ -81,7 +84,6 @@ export default function Map() {
         </div>
       )}
 
-      {/* Legend */}
       <div className="absolute bottom-8 left-4 z-[1000] bg-surface/95 border border-border rounded-lg px-3 py-2 flex flex-col gap-1.5 shadow-md">
         {LEGEND.map((l) => (
           <div key={l.color} className="flex items-center gap-2 text-xs text-text-muted">
@@ -112,7 +114,7 @@ export default function Map() {
             >
               <Popup>
                 <div className="flex flex-col gap-1.5 text-sm min-w-[160px]">
-                  <p className="font-semibold text-base">{CATEGORY_LABEL[cat] ?? cat}</p>
+                  <p className="font-semibold">{CATEGORY_LABEL[cat] ?? cat}</p>
                   <StatusBadge status={r.floodStatus} />
                   {r.aidStatus && <AidBadge status={r.aidStatus} />}
                   {r.address && <p className="text-xs text-gray-500 mt-1">{r.address}</p>}
