@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 /* Storm Ledger palette — locked in BRAIN.md § Visual Identity.
    Do not substitute or invent new values here. */
@@ -49,5 +50,8 @@ body {
   }
 }
 
-/* Leaflet base styles are imported per-component (see Map.tsx) since
-   this file has no dependency on leaflet's CSS module system. */
+/* Leaflet custom pin — neutralise default white-box divIcon styling */
+.sinked-pin {
+  background: none !important;
+  border: none !important;
+}
