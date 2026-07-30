@@ -17,6 +17,7 @@ export async function GET() {
       address: reports.address,
       floodStatus: reports.floodStatus,
       aidStatus: reports.aidStatus,
+      category: reports.category,
       isProxy: reports.isProxy,
       photoUrl: reports.photoUrl,
       createdAt: reports.createdAt,
