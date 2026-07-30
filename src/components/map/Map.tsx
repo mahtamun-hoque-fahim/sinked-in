@@ -5,7 +5,6 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { fetchReports } from "@/lib/api-client";
-import { StatusBadge, AidBadge } from "@/components/ui/Badges";
 import type { Report } from "@/lib/db/schema";
 
 const CHATTOGRAM_CENTER: [number, number] = [22.3384, 91.8317];
@@ -17,20 +16,49 @@ const CATEGORY_COLOR: Record<string, string> = {
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
-  medical: "Medical assistance",
-  food:    "Food / supplies",
-  status:  "Flood status",
+  medical: "🚑 Medical assistance needed",
+  food:    "🍞 Food / supplies needed",
+  status:  "🌊 Flood status report",
 };
 
+// Plain text labels for the legend (no emoji — handled separately)
 const LEGEND = [
-  { color: "#ef4444", label: "Medical assistance needed" },
-  { color: "#3b82f6", label: "Food / supplies needed" },
-  { color: "#eab308", label: "Flood status report" },
+  { color: "#ef4444", label: "Medical assistance" },
+  { color: "#3b82f6", label: "Food / supplies" },
+  { color: "#eab308", label: "Flood status" },
 ];
 
+const FLOOD_LABEL: Record<string, string> = {
+  flooded:        "Flooded",
+  safe:           "Safe",
+  not_in_danger:  "Flooded, not in danger",
+};
+
+const FLOOD_BG: Record<string, string> = {
+  flooded:        "#ef444422",
+  safe:           "#22c55e22",
+  not_in_danger:  "#eab30822",
+};
+
+const FLOOD_COLOR: Record<string, string> = {
+  flooded:        "#ef4444",
+  safe:           "#22c55e",
+  not_in_danger:  "#eab308",
+};
+
+const AID_LABEL: Record<string, string> = {
+  needs_aid:   "Needs aid",
+  in_progress: "Aid in progress",
+  aided:       "Aided",
+};
+
+const AID_COLOR: Record<string, string> = {
+  needs_aid:   "#f97316",
+  in_progress: "#3b82f6",
+  aided:       "#3dd6c4",
+};
+
 function createPinIcon(color: string) {
-  // Google Maps-style pin: round circle head, body tapering to sharp bottom point.
-  // viewBox 0 0 24 36 — head circle center at (12,11) r=9, point at (12,36).
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="36" height="54">
     <defs>
       <filter id="d" x="-50%" y="-20%" width="200%" height="160%">
@@ -54,15 +82,84 @@ function createPinIcon(color: string) {
   });
 }
 
+// Popup content built as raw HTML string so Leaflet can render it
+// without React — Leaflet's Popup content is a DOM node, not JSX.
+function buildPopupHtml(r: Report & { category?: string }): string {
+  const cat = r.category ?? "status";
+  const catColor = CATEGORY_COLOR[cat] ?? "#eab308";
+  const catLabel = CATEGORY_LABEL[cat] ?? cat;
+
+  const floodBg    = FLOOD_BG[r.floodStatus]    ?? "#ffffff11";
+  const floodColor = FLOOD_COLOR[r.floodStatus]  ?? "#fff";
+  const floodLabel = FLOOD_LABEL[r.floodStatus]  ?? r.floodStatus;
+
+  const aidHtml = r.aidStatus
+    ? `<span style="
+        display:inline-block;
+        padding:2px 8px;
+        border-radius:4px;
+        font-size:11px;
+        font-weight:600;
+        letter-spacing:.04em;
+        background:${AID_COLOR[r.aidStatus]}22;
+        color:${AID_COLOR[r.aidStatus]};
+      ">${AID_LABEL[r.aidStatus] ?? r.aidStatus}</span>`
+    : "";
+
+  const addressHtml = r.address
+    ? `<p style="margin:4px 0 0;font-size:12px;color:#9ca3af;">${r.address}</p>`
+    : "";
+
+  const timeHtml = r.createdAt
+    ? `<p style="margin:6px 0 0;font-size:11px;color:#6b7280;">
+        Reported ${new Date(r.createdAt).toLocaleDateString("en-GB", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" })}
+      </p>`
+    : "";
+
+  return `
+    <div style="font-family:sans-serif;min-width:200px;max-width:240px;padding:0;">
+      <div style="
+        background:${catColor}18;
+        border-left:3px solid ${catColor};
+        padding:8px 10px 6px;
+        border-radius:4px 4px 0 0;
+      ">
+        <p style="margin:0;font-size:13px;font-weight:700;color:#111;">${catLabel}</p>
+      </div>
+      <div style="padding:8px 10px 10px;display:flex;flex-direction:column;gap:6px;">
+        <span style="
+          display:inline-block;
+          padding:2px 8px;
+          border-radius:4px;
+          font-size:11px;
+          font-weight:600;
+          letter-spacing:.04em;
+          background:${floodBg};
+          color:${floodColor};
+        ">${floodLabel}</span>
+        ${aidHtml}
+        ${addressHtml}
+        ${timeHtml}
+        <p style="
+          margin:6px 0 0;
+          font-size:11px;
+          color:#9ca3af;
+          border-top:1px solid #f3f4f6;
+          padding-top:6px;
+        ">Contact info visible to verified responders only.</p>
+      </div>
+    </div>`;
+}
+
 export default function Map() {
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<(Report & { category?: string })[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     fetchReports()
-      .then((data) => { if (!cancelled) setReports(data); })
+      .then((data) => { if (!cancelled) setReports(data as (Report & { category?: string })[]); })
       .catch((err) => { if (!cancelled) setError(err instanceof Error ? err.message : "Could not load reports."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
@@ -101,7 +198,7 @@ export default function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {reports.map((r) => {
-          const cat = (r as Report & { category?: string }).category ?? "status";
+          const cat = r.category ?? "status";
           const color = CATEGORY_COLOR[cat] ?? "#eab308";
           return (
             <Marker
@@ -110,12 +207,7 @@ export default function Map() {
               icon={createPinIcon(color)}
             >
               <Popup>
-                <div className="flex flex-col gap-1.5 text-sm min-w-[160px]">
-                  <p className="font-semibold">{CATEGORY_LABEL[cat] ?? cat}</p>
-                  <StatusBadge status={r.floodStatus} />
-                  {r.aidStatus && <AidBadge status={r.aidStatus} />}
-                  {r.address && <p className="text-xs text-gray-500 mt-1">{r.address}</p>}
-                </div>
+                <div dangerouslySetInnerHTML={{ __html: buildPopupHtml(r) }} />
               </Popup>
             </Marker>
           );
